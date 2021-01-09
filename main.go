@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 var version = "4.3.0"
@@ -56,6 +57,7 @@ type Attendance struct {
 }
 
 func main() {
+	port := os.Getenv("PORT")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			fmt.Println("YES")
@@ -139,5 +141,5 @@ func main() {
 		return
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(port, nil))
 }
