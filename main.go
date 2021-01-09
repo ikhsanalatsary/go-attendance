@@ -141,5 +141,5 @@ func main() {
 		return
 	})
 
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
