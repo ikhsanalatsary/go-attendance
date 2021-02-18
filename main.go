@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -61,6 +62,38 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			fmt.Println("YES")
+			if _, exist := r.URL.Query()["q"]; exist {
+				q := r.URL.Query().Get("q")
+				googleURL := "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=" + q
+				client := http.Client{}
+				req, _ := http.NewRequest("GET", googleURL, nil)
+				req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:85.0) Gecko/20100101 Firefox/85.0")
+				req.Header.Add("Host", "suggestqueries.google.com")
+				w.Header().Add("Content-type", "application/json; charset=UTF-8")
+				res, err := client.Do(req)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte("{\"error\": \"Can not request\"}"))
+					return
+				}
+
+				var data []byte
+				if res.StatusCode >= 200 && res.StatusCode < 400 {
+					defer res.Body.Close()
+					data, err = ioutil.ReadAll(res.Body)
+					if err != nil {
+						w.WriteHeader(http.StatusInternalServerError)
+						w.Write([]byte("{\"error\": \"Can not request\"}"))
+						return
+					}
+					w.Write(data)
+					return
+				} else {
+					w.WriteHeader(res.StatusCode)
+					w.Write(data)
+					return
+				}
+			}
 		}
 		w.Write([]byte("Hello Go!"))
 	})
