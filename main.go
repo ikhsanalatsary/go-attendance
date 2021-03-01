@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -64,6 +65,9 @@ func main() {
 			fmt.Println("YES")
 			if _, exist := r.URL.Query()["q"]; exist {
 				q := r.URL.Query().Get("q")
+				if q != "" {
+					q = url.QueryEscape(q)
+				}
 				googleURL := "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=" + q
 				client := http.Client{}
 				req, _ := http.NewRequest("GET", googleURL, nil)
